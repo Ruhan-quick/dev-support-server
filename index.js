@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const MongoClient = require("mongodb").MongoClient;
+const { ObjectId } = require("bson");
 require("dotenv").config();
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.oiqme.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
@@ -43,7 +44,6 @@ client.connect((err) => {
   app.get("/showServices", (req, res) => {
     serviceCollection.find({}).toArray((err, documents) => {
       res.send(documents);
-      console.log("document sent");
     });
   });
   //add teachers
@@ -58,7 +58,6 @@ client.connect((err) => {
   app.get("/showTeacher", (req, res) => {
     teacherCollection.find({}).toArray((err, documents) => {
       res.send(documents);
-      console.log("document sent");
     });
   });
 
@@ -72,7 +71,6 @@ client.connect((err) => {
   app.get("/showAdmins", (req, res) => {
     adminCollection.find({}).toArray((err, documents) => {
       res.send(documents);
-      console.log("document sent");
     });
   });
 
@@ -82,6 +80,41 @@ client.connect((err) => {
     requestCollection.insertOne(request).then((result) => {
       res.send(result.insertedCount > 0);
     });
+  });
+  app.get("/showRequests", (req, res) => {
+    requestCollection
+      .find({ email: req.query.email })
+      .toArray((err, documents) => {
+        res.send(documents);
+      });
+  });
+  app.get("/showAllRequest", (req, res) => {
+    requestCollection.find({}).toArray((err, documents) => {
+      res.send(documents);
+    });
+  });
+
+  //specific request single
+  app.get("/request/:id", (req, res) => {
+    requestCollection
+      .find({ _id: ObjectId(req.params.id) })
+      .toArray((error, documents) => {
+        res.send(documents[0]);
+      });
+  });
+  //update
+  app.patch("/update/:id", (req, res) => {
+    console.log(req.params.id, req.body.status);
+    requestCollection
+      .updateOne(
+        { _id: ObjectId(req.params.id) },
+        {
+          $set: { status: req.body.status },
+        }
+      )
+      .then((result) => {
+        console.log(result);
+      });
   });
 
   //send review
@@ -94,7 +127,6 @@ client.connect((err) => {
   app.get("/showReview", (req, res) => {
     reviewCollection.find({}).toArray((err, documents) => {
       res.send(documents);
-      console.log("document sent");
     });
   });
 });
