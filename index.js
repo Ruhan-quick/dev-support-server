@@ -30,6 +30,7 @@ client.connect((err) => {
   const teacherCollection = client.db("devSupport").collection("teachers");
   const adminCollection = client.db("devSupport").collection("admins");
   const requestCollection = client.db("devSupport").collection("requests");
+  const reviewCollection = client.db("devSupport").collection("reviews");
   console.log("db connected successfully");
   //add service
   app.post("/addService", (req, res) => {
@@ -68,12 +69,32 @@ client.connect((err) => {
       res.send(result.insertedCount > 0);
     });
   });
+  app.get("/showAdmins", (req, res) => {
+    adminCollection.find({}).toArray((err, documents) => {
+      res.send(documents);
+      console.log("document sent");
+    });
+  });
 
   //send request
   app.post("/sendRequest", (req, res) => {
     const request = req.body;
     requestCollection.insertOne(request).then((result) => {
       res.send(result.insertedCount > 0);
+    });
+  });
+
+  //send review
+  app.post("/sendReview", (req, res) => {
+    const review = req.body;
+    reviewCollection.insertOne(review).then((result) => {
+      res.send(result.insertedCount > 0);
+    });
+  });
+  app.get("/showReview", (req, res) => {
+    reviewCollection.find({}).toArray((err, documents) => {
+      res.send(documents);
+      console.log("document sent");
     });
   });
 });
